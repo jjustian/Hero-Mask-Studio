@@ -1,0 +1,766 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hero Mask Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120a22;--panel:#1f1138;--panel2:#2a1750;--stage:#1a0f30;--ink:#f3ecff;--dim:#b8a8d9;--line:rgba(255,255,255,.13);
+  --cyan:#2fd6ff;--mag:#ff3fa4;--yel:#ffd93b;--lime:#b6ff2e;--danger:#ff5d5d;
+  --paper:#fbf6e9;--paperInk:#2b2140;--paperDim:#6b5d86;--paperLine:#e6dcc4;--paperAcc:#7b2fd0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 Nunito,system-ui,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between}
+.brand small{display:block;font:700 12px Nunito,sans-serif;letter-spacing:.18em;color:var(--lime);text-transform:uppercase}
+.brand h1{margin:0;font:400 clamp(30px,6vw,46px)/1 Bangers,Impact,sans-serif;letter-spacing:.04em;color:var(--yel);text-shadow:3px 3px 0 var(--mag)}
+.topbtns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:2px solid var(--line);background:var(--panel2);border-radius:12px;padding:8px 14px;font-weight:800}
+.btn:hover{border-color:var(--cyan)}
+.btn.warn{border-color:var(--danger);color:#ffd0d0}
+.btn.big{font:400 24px/1 Bangers,Impact,sans-serif;letter-spacing:.05em;padding:12px 18px;background:var(--mag);border-color:var(--mag);color:#fff;width:100%}
+.btn.big:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.studio{display:grid;gap:14px;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"stage hero" "stage mask" "stage craft" "stage finish";align-items:start}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:14px;min-width:0}
+.card h2{margin:0 0 10px;font:400 22px/1 Bangers,Impact,sans-serif;letter-spacing:.06em;color:var(--cyan)}
+.card h2 span{color:var(--dim);font:700 13px Nunito,sans-serif;letter-spacing:0;margin-left:6px}
+.stagecard{grid-area:stage;position:sticky;top:max(8px,env(safe-area-inset-top,0px))}
+.herocard{grid-area:hero}.maskcard{grid-area:mask}.craftcard{grid-area:craft}.finishcard{grid-area:finish}
+#stage{width:100%;height:auto;max-height:calc(100dvh - 130px);display:block;touch-action:none;user-select:none;-webkit-user-select:none;max-width:560px;margin:0 auto}
+.modebar{display:flex;justify-content:center;margin-bottom:8px}
+.modebar .seg button{font-size:15px;padding:8px 16px}
+#stage.inking{cursor:crosshair}
+.inkrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%}
+.inkrow .sw{width:28px;height:28px}
+.btn.on{background:var(--cyan);color:#120a22;border-color:var(--cyan)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:44px;align-items:center}
+.tools .btn{padding:7px 11px;font-size:14px}
+.tools .btn.stitch{background:var(--lime);color:#1b1426;border-color:var(--lime)}
+.tools .btn.unstitch{border-color:var(--mag)}
+.hint{color:var(--dim);font-size:14px;margin:0}
+.selinfo{width:100%;font-size:14px;color:var(--yel);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:10px 0 6px}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:7px 12px;font-weight:800;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--cyan);color:#120a22}
+.sw{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,.25);padding:0}
+.sw[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 3px var(--mag)}
+.shapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.shapes button{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:6px 2px 4px;display:grid;justify-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--dim)}
+.shapes button:hover{border-color:var(--yel);color:var(--ink)}
+.shapes svg{width:36px;height:36px}
+input[type=text]{background:var(--stage);border:2px solid var(--line);border-radius:12px;color:var(--ink);padding:9px 12px;font:800 18px Nunito,sans-serif;width:100%;min-width:0}
+.namerow{display:flex;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:2px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-weight:800;font-size:14px}
+.chips button[aria-pressed="true"]{background:var(--yel);color:#1b1426;border-color:var(--yel)}
+.motto{font:400 24px/1.1 Bangers,Impact,sans-serif;letter-spacing:.05em;color:var(--lime);margin-top:10px}
+.note{font-size:13px;color:var(--dim);margin:8px 0 0}
+#toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--yel);color:#1b1426;font-weight:900;padding:10px 16px;border-radius:14px;box-shadow:0 6px 0 rgba(0,0,0,.35);max-width:min(92vw,520px);text-align:center;z-index:9;transition:opacity .25s;opacity:0;pointer-events:none}
+#toast.on{opacity:1}
+/* stage svg classes */
+.pc{cursor:grab}
+.pc.glued{cursor:pointer}
+.pc.selected .selring{display:block}
+.selring{display:none;fill:none;stroke:var(--yel);stroke-width:2.5;stroke-dasharray:6 5}
+.pc.target .tring{display:block}
+.tring{display:none;fill:rgba(182,255,46,.18);stroke:var(--lime);stroke-width:3}
+.loose{fill:none;stroke:#fff;stroke-opacity:.55;stroke-width:1.5;stroke-dasharray:3 4}
+.bench{fill:#3a2a1e;stroke:#5c4330;stroke-width:3}
+.benchtx{font:700 11px Nunito,sans-serif;letter-spacing:.14em;fill:#d8b994}
+.hole{fill:var(--stage);stroke:rgba(255,255,255,.35);stroke-width:1.5;stroke-dasharray:4 3}
+.glow{animation:pop .55s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+.gin.glow{transform-box:fill-box;transform-origin:center}
+.burst{font:400 26px Bangers,Impact,sans-serif;fill:var(--lime);stroke:#1b1426;stroke-width:4;paint-order:stroke;animation:rise 1s ease-out forwards;pointer-events:none}
+@keyframes rise{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-34px)}}
+@media (prefers-reduced-motion:reduce){.glow,.burst{animation:none}.burst{opacity:0}}
+/* workbook */
+#book{max-width:820px;margin:0 auto;width:100%}
+.bookbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-bottom:12px}
+.page{background:var(--paper);color:var(--paperInk);border-radius:6px 18px 18px 6px;padding:22px clamp(16px,4vw,40px) 30px;box-shadow:0 10px 0 rgba(0,0,0,.35),inset 14px 0 0 #efe5cc;
+  background-image:repeating-linear-gradient(transparent 0 31px,var(--paperLine) 31px 32px)}
+.page h2{font:400 clamp(28px,5vw,40px)/1 Bangers,Impact,sans-serif;letter-spacing:.04em;color:var(--paperAcc);margin:0;text-wrap:balance}
+.page .kicker{font:900 12px Nunito,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#c2410c}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-weight:800;color:var(--paperDim);margin:8px 0 18px;font-size:14px}
+.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;padding:14px 0;border-top:2px dashed var(--paperLine)}
+.num{width:44px;height:44px;border-radius:50%;background:var(--paperAcc);color:#fff;display:grid;place-items:center;font:400 24px Bangers,Impact,sans-serif}
+.step.grown .num{background:#c2410c}
+.step h3{margin:6px 0 6px;font:900 19px Nunito,sans-serif;text-wrap:balance}
+.step h3 .gu{font:800 12px Nunito,sans-serif;background:#c2410c;color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.step ul,.step ol{margin:0;padding-left:20px}
+.step li{margin:3px 0}
+.tip{font:20px/1.25 "Patrick Hand","Comic Sans MS","Chalkboard SE",cursive;color:#1d6f5c;margin:8px 0 0}
+.pics{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;align-items:flex-start}
+.pics figure{margin:0;display:grid;justify-items:center;gap:4px;font:18px "Patrick Hand",cursive;color:var(--paperDim)}
+.pics svg{background:#fffdf6;border:2px solid var(--paperLine);border-radius:12px;max-width:100%;height:auto}
+.cutlist{list-style:none;padding:0!important;display:grid;gap:4px}
+.cutlist li{display:flex;align-items:center;gap:8px}
+.cutlist svg{width:30px;height:30px;flex:none}
+.herocardout{margin-top:10px;border:4px solid var(--paperInk);border-radius:16px;padding:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:#fff6c9}
+.herocardout svg{width:140px;height:auto;flex:none}
+.herocardout b{font:400 30px/1 Bangers,Impact,sans-serif;letter-spacing:.04em;color:var(--paperAcc);display:block}
+.herocardout i{font:400 22px Bangers,Impact,sans-serif;font-style:normal;letter-spacing:.04em;color:#c2410c}
+#copyOut{width:100%;margin-top:10px;font:13px ui-monospace,monospace;background:#fff;color:#222;border-radius:10px;padding:10px;min-height:120px}
+@media (max-width:820px){
+  .studio{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "stage" "craft" "mask" "finish"}
+  .stagecard{position:static}
+}
+</style>
+
+<div class="wrap" id="studioView">
+  <header class="top">
+    <div class="brand"><small>⚡ Professor Lightning presents</small><h1>Hero Mask Studio</h1></div>
+    <div class="topbtns">
+      <button class="btn" id="presetBtn" type="button">⚡ Try Lightning's mask</button>
+      <button class="btn" id="newBtn" type="button">🆕 New mask</button>
+    </div>
+  </header>
+
+  <main class="studio">
+    <section class="card stagecard" aria-label="Mask stage">
+      <div class="modebar"><div class="seg" id="modeSeg" role="group" aria-label="Tool mode"><button type="button" data-v="pieces">✂ Pieces</button><button type="button" data-v="ink">🖍 Markers</button></div></div>
+      <svg id="stage" viewBox="0 0 400 540" role="application" aria-label="Your mask and workbench. Drag pieces to stack them or place them on the mask." tabindex="0"></svg>
+      <div class="tools" id="tools"></div>
+    </section>
+
+    <section class="card herocard">
+      <h2>1 · Invent your hero <span>no real names!</span></h2>
+      <div class="namerow">
+        <input type="text" id="heroName" maxlength="24" placeholder="Hero name…" autocomplete="off" aria-label="Hero name">
+        <button class="btn" id="diceBtn" type="button" aria-label="Suggest a hero name">🎲</button>
+      </div>
+      <div class="lbl">Their ___ is my own</div>
+      <div class="chips" id="words"></div>
+      <div class="motto" id="motto"></div>
+    </section>
+
+    <section class="card maskcard">
+      <h2>2 · Pick your mask <span>the paper you start with</span></h2>
+      <div class="seg" id="maskType" role="group" aria-label="Mask style">
+        <button type="button" data-v="full">Full luchador</button><button type="button" data-v="half">Hero band</button>
+      </div>
+      <div class="lbl">Mask color</div>
+      <div class="row" id="maskColors"></div>
+      <div class="lbl">Two-tone</div>
+      <div class="seg" id="splitSeg" role="group" aria-label="Two-tone style"></div>
+      <div id="c2wrap"><div class="lbl">Second color</div><div class="row" id="maskColors2"></div></div>
+    </section>
+
+    <section class="card craftcard">
+      <h2>3 · Craft box <span>tap a shape to cut it out</span></h2>
+      <div class="row">
+        <div class="seg" id="matSeg" role="group" aria-label="Material">
+          <button type="button" data-v="paper">📄 Paper</button><button type="button" data-v="foam">🧽 Foam</button>
+        </div>
+        <div class="seg" id="sizeSeg" role="group" aria-label="Size">
+          <button type="button" data-v="S">S</button><button type="button" data-v="M">M</button><button type="button" data-v="L">L</button>
+        </div>
+      </div>
+      <div class="lbl">Color</div>
+      <div class="row" id="craftColors"></div>
+      <div class="lbl">Shapes</div>
+      <div class="shapes" id="shapeGrid"></div>
+      <p class="note">Pieces land on the <b>workbench</b>. Drag one onto another to <b>paste them into a stack</b>, drag a stack onto the mask, then <b>🧵 Stitch</b> it on.</p>
+    </section>
+
+    <section class="card finishcard">
+      <h2>4 · Make it for real</h2>
+      <button class="btn big" id="finishBtn" type="button">📒 Make my workbook!</button>
+      <p class="note" id="finishNote">Turns your design into rainy-day steps with paper, foam, pom-poms, glue and string.</p>
+    </section>
+  </main>
+</div>
+
+<div id="book" hidden>
+  <div class="bookbar">
+    <button class="btn" id="backBtn" type="button">← Back to the studio</button>
+    <button class="btn" id="copyBtn" type="button">📋 Copy the steps</button>
+  </div>
+  <article class="page" id="bookPage"></article>
+  <textarea id="copyOut" hidden readonly aria-label="Workbook text"></textarea>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const KEY="hms_v1";
+
+/* ---------- CRAFT DATA (options can grow from a database later; the workbook only needs these fields) ---------- */
+const COLORS={
+  red:{n:"red",h:"#e8322f"},orange:{n:"orange",h:"#ff8a1f"},yellow:{n:"yellow",h:"#ffd93b"},gold:{n:"gold",h:"#d4a72c"},
+  lime:{n:"neon lime",h:"#b6ff2e"},green:{n:"green",h:"#2fbf5a"},cyan:{n:"sky blue",h:"#2fd6ff"},blue:{n:"blue",h:"#2a5bd7"},
+  purple:{n:"dark purple",h:"#3b1a6b"},pink:{n:"pink",h:"#ff5fae"},white:{n:"white",h:"#f5f2ea"},black:{n:"black",h:"#1b1426"},silver:{n:"silver",h:"#b9c0cc"}
+};
+const starD=(()=>{const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?21:50;p.push((r*Math.cos(a)).toFixed(1)+","+(r*Math.sin(a)).toFixed(1))}return "M"+p.join(" L")+" Z"})();
+const circ=r=>`M${-r},0 A${r},${r} 0 1,0 ${r},0 A${r},${r} 0 1,0 ${-r},0 Z`;
+/* fold: shape can be cut from folded paper (half along the fold). r: rough radius factor for overlap/eye checks */
+const SHAPES={
+  circle:{n:"circle",d:circ(50),fold:"Trace around a cup or jar lid for a perfect circle."},
+  ring:{n:"ring",d:circ(50)+" "+circ(28),ring:28,fold:"Cut a circle, fold it in half, and snip out the middle along the fold."},
+  star:{n:"star",d:starD},
+  bolt:{n:"lightning bolt",d:"M10,-50 L-30,5 L-5,5 L-15,50 L30,-10 L5,-10 L20,-50 Z"},
+  heart:{n:"heart",d:"M0,40 C-60,0 -40,-45 0,-20 C40,-45 60,0 0,40 Z",fold:"Fold the paper, draw half a heart against the fold, cut, and unfold."},
+  flame:{n:"flame",d:"M0,50 C-35,50 -45,20 -30,-5 C-25,10 -15,12 -12,5 C-20,-20 -5,-35 0,-50 C5,-30 30,-20 30,10 C35,0 38,-5 40,-10 C50,20 35,50 0,50 Z"},
+  wing:{n:"wing",d:"M-45,30 C-30,-20 10,-45 50,-40 C35,-30 40,-25 45,-20 C25,-15 30,-8 35,-2 C15,0 20,8 22,14 C0,14 -20,22 -45,30 Z"},
+  triangle:{n:"triangle",d:"M0,-48 L48,40 L-48,40 Z",fold:"Fold the paper and cut one slanted line from the fold for a matching triangle."},
+  diamond:{n:"diamond",d:"M0,-50 L35,0 L0,50 L-35,0 Z",fold:"Fold the paper and cut a 'V' from the fold — unfold for a diamond."},
+  moon:{n:"moon",d:"M10,-48 A48,48 0 1,0 10,48 A60,60 0 0,1 10,-48 Z"},
+  drop:{n:"teardrop",d:"M0,-50 C20,-20 35,0 35,18 A35,32 0 0,1 -35,18 C-35,0 -20,-20 0,-50 Z",fold:"Fold the paper and draw half a teardrop against the fold."},
+  stripe:{n:"stripe",d:"M-50,-9 L50,-9 L50,9 L-50,9 Z",thin:1,fold:"Use a ruler to draw a straight strip."},
+  zigzag:{n:"zigzag",d:"M-50,-5 L-33,-18 L-17,-5 L0,-18 L17,-5 L33,-18 L50,-5 L50,10 L33,-3 L17,10 L0,-3 L-17,10 L-33,-3 L-50,10 Z",thin:1},
+  crown:{n:"crown",d:"M-45,30 L-45,-25 L-22,0 L0,-40 L22,0 L45,-25 L45,30 Z",fold:"Fold the paper and cut half a crown against the fold so both sides match."},
+  leaf:{n:"leaf",d:"M-48,0 C-25,-30 25,-30 48,0 C25,30 -25,30 -48,0 Z",fold:"Fold the paper and cut a curve from the fold — unfold for a leaf."}
+};
+const SIZES={S:{s:.45,n:"small",hint:"about the size of a quarter"},M:{s:.75,n:"medium",hint:"about the size of a cookie"},L:{s:1.15,n:"large",hint:"about the size of your palm"}};
+const PX_IN=43; /* stage pixels per real inch (mask template ≈ 6½ in wide) */
+const MASKS={
+  full:{n:"full luchador mask",d:"M200,22 C292,22 342,92 342,192 C342,302 290,388 200,392 C110,388 58,302 58,192 C58,92 108,22 200,22 Z",
+    holes:[{x:146,y:178,rx:30,ry:19,n:"left eye"},{x:254,y:178,rx:30,ry:19,n:"right eye"},{x:200,y:318,rx:34,ry:15,n:"mouth"}],
+    e:{x:200,y:207,rx:142,ry:185},box:"40 10 320 395",fold:"Fold a 9 × 12 in sheet in half the tall way. Draw half of the mask against the fold — about 3¼ in out from the fold and 8½ in tall (from your eyebrows to under your chin).",
+    string:"Punch a hole on each side, level with the eyes, about ½ in in from the edge.",splits:["none","side","top"]},
+  half:{n:"hero band mask",d:"M58,150 C58,118 128,108 200,124 C272,108 342,118 342,150 L348,206 C326,252 262,254 226,226 L200,212 L174,226 C138,254 74,252 52,206 Z",
+    holes:[{x:142,y:178,rx:30,ry:17,n:"left eye"},{x:258,y:178,rx:30,ry:17,n:"right eye"}],
+    e:{x:200,y:182,rx:150,ry:66},box:"40 95 320 175",fold:"Fold a sheet in half the short way. Draw half of the band against the fold — about 3½ in out from the fold and 3 in tall, with a dip for your nose.",
+    string:"Punch a hole at each pointy end, about ½ in in from the edge.",splits:["none","side"]}
+};
+const SPLITN={none:"One color",side:"Left | Right",top:"Forehead cap"};
+const WORDS=["Dream","Laughter","Music","Garden","Courage","Kindness","Friendship","Starlight","Story","Art"];
+const NAMES=["Captain Comet","La Chispa","El Trueno","Señorita Starlight","Thunder Pup","Mighty Marigold","Doctor Moonbeam","El Jaguar Azul","La Mariposa","Rocket Rosa","Firefly Kid","Volcán Jr.","Neon Nopal","Starfish Sentinel"];
+const POSES=["Fists on hips, chin up, and a big brave smile!","One fist to the sky, like you're catching lightning!","Arms crossed, one eyebrow up — the classic lucha stare!","Point to the horizon: trouble is THAT way!","Hands in a heart shape over your chest!"];
+const MAXSTACK=6;
+/* markers: p = paint pen (shows on dark paper) */
+const INK={black:{n:"black",h:"#1b1426"},red:{n:"red",h:"#e8322f"},orange:{n:"orange",h:"#ff8a1f"},yellow:{n:"yellow",h:"#ffd93b"},green:{n:"green",h:"#2fbf5a"},
+  blue:{n:"blue",h:"#2a5bd7"},purple:{n:"purple",h:"#7b2fd0"},pink:{n:"pink",h:"#ff5fae"},gold:{n:"gold",h:"#e0b43a",p:1},silver:{n:"silver",h:"#cfd5de",p:1},white:{n:"white",h:"#ffffff",p:1}};
+const INKW={fine:3,thick:7};const MAXINK=8000;
+const DARK=new Set(["purple","black","blue"]);
+const BW={thin:11,thick:22}; /* border width in stage px: ¼ in and ½ in */
+const bdWord=bd=>bd>=BW.thick?"½":"¼";
+const pieceCount=g=>g.items.filter(i=>!i.bd).length;
+
+/* ---------- STATE ---------- */
+const fresh=()=>({hero:{name:"",word:"Dream"},mask:{type:"full",color:"red",split:"none",color2:"yellow"},groups:[],ink:[],nid:1,craft:{mat:"paper",color:"yellow",size:"M"},pen:{c:"black",w:"thick",mirror:true}});
+let S=store.get(KEY);
+if(!S||!S.mask||!Array.isArray(S.groups))S=fresh();
+if(!Array.isArray(S.ink))S.ink=[];if(!S.pen)S.pen={c:"black",w:"thick",mirror:true};
+let mode="pieces";
+let sel=null;            /* selected group id */
+const save=()=>store.set(KEY,S);
+const G=id=>S.groups.find(g=>g.id===id);
+
+/* ---------- SOUND ---------- */
+let ac=null;
+function tone(f,d,type="square",v=.05,delay=0){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+const sfx={snip(){tone(1100,.05);tone(1500,.05,"square",.05,.07)},paste(){tone(240,.14,"sine",.12)},glue(){tone(520,.09,"triangle",.09);tone(780,.09,"triangle",.09,.09);tone(1040,.16,"triangle",.09,.18)},peel(){tone(900,.12,"sawtooth",.035);tone(500,.12,"sawtooth",.035,.08)},nope(){tone(160,.18,"square",.05)}};
+
+let toastT=0;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),2600)}
+
+/* ---------- GEOMETRY ---------- */
+const rad=a=>a*Math.PI/180;
+const rot=(x,y,a)=>{const c=Math.cos(rad(a)),s=Math.sin(rad(a));return[x*c-y*s,x*s+y*c]};
+const itemR=it=>50*SIZES[it.z].s+(it.bd||0);
+function worldItems(g){return g.items.map(it=>{const[ox,oy]=rot(it.dx,it.dy,g.r);return{it,x:g.x+ox,y:g.y+oy,R:itemR(it)}})}
+function groupR(g){let m=0;for(const it of g.items)m=Math.max(m,Math.hypot(it.dx,it.dy)+itemR(it));return m}
+const ell=(x,y,e)=>((x-e.x)/e.rx)**2+((y-e.y)/e.ry)**2;
+const insideMask=(x,y,pad=1)=>ell(x,y,MASKS[S.mask.type].e)<=pad;
+function overhangs(g){for(const w of worldItems(g))for(let k=0;k<8;k++){const a=k*Math.PI/4;if(!insideMask(w.x+Math.cos(a)*w.R*.8,w.y+Math.sin(a)*w.R*.8))return true}return false}
+function covers(w,h){if(SHAPES[w.it.sh].ring){const inner=SHAPES[w.it.sh].ring*SIZES[w.it.z].s-(w.it.bd||0);if(Math.hypot(w.x-h.x,w.y-h.y)+Math.max(h.rx,h.ry)*.9<=inner)return false}
+  const R=SHAPES[w.it.sh].thin?w.R*.5:w.R*.8;return Math.hypot(w.x-h.x,(w.y-h.y)*1.4)<R+Math.min(h.rx,h.ry)*.6}
+
+function zoneOf(x,y){
+  const m=S.mask.type,M=MASKS[m],dx=x-200,side=dx<0?"left":"right";
+  for(const h of M.holes.slice(0,2))if(Math.hypot(x-h.x,(y-h.y)*1.3)<50)return"around the "+h.n;
+  if(m==="full"){
+    if(!insideMask(x,y))return"sticking out past the "+(y<110?"top":y>330?"bottom":side)+" edge";
+    if(Math.hypot(x-200,(y-318)*1.4)<55)return"around the mouth";
+    if(y<135)return Math.abs(dx)<70?"in the middle of the forehead":"on the "+side+" side of the forehead";
+    if(y<215)return Math.abs(dx)<38?"on the nose bridge, between the eyes":"on the "+side+" temple";
+    if(y<290)return Math.abs(dx)<45?"on the nose":"on the "+side+" cheek";
+    return Math.abs(dx)<70?"on the chin":"on the "+side+" jaw";
+  }
+  if(!insideMask(x,y))return"sticking out past the "+(y<150?"top":y>215?"bottom":side)+" edge";
+  if(Math.abs(dx)<42)return y<165?"at the top middle, above the nose":"between the eyes";
+  if(Math.abs(dx)>105)return"on the "+side+" wing tip";
+  return(y<165?"above the ":"below the ")+side+" eye";
+}
+
+/* ---------- SVG PIECES ---------- */
+function itemSVG(it,fid=""){
+  const s=SIZES[it.z].s,f=it.f?-1:1,col=COLORS[it.c].h;
+  const tf=`translate(${it.dx.toFixed(1)} ${it.dy.toFixed(1)}) rotate(${it.r||0}) scale(${(f*s).toFixed(3)} ${s.toFixed(3)})`;
+  if(it.m==="pom")return`<g transform="${tf}"><circle r="46" fill="${col}" filter="url(#fuzz${fid})"/><circle cx="-14" cy="-16" r="13" fill="#fff" opacity=".28"/></g>`;
+  const d=SHAPES[it.sh].d;
+  if(it.bd){const w=(2*it.bd/s).toFixed(2),ow=(2*it.bd/s+2.4/s).toFixed(2);
+    return`<g transform="${tf}"><path d="${d}" fill="${col}" fill-rule="evenodd" stroke="rgba(0,0,0,.45)" stroke-width="${ow}" stroke-linejoin="round"/><path d="${d}" fill="${col}" fill-rule="evenodd" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" ${it.m==="foam"?`filter="url(#foam${fid})"`:""}/></g>`}
+  if(it.m==="foam")return`<g transform="${tf}"><path d="${d}" fill="${col}" fill-rule="evenodd" stroke="rgba(0,0,0,.45)" stroke-width="3" vector-effect="non-scaling-stroke" filter="url(#foam${fid})"/></g>`;
+  return`<g transform="${tf}"><path d="${d}" fill="${col}" fill-rule="evenodd" stroke="rgba(0,0,0,.35)" stroke-width="1.2" vector-effect="non-scaling-stroke"/></g>`;
+}
+function groupInner(g){return g.items.map(itemSVG).join("")}
+function groupSVG(g){
+  const R=groupR(g)+6,cls=["pc",g.g?"glued":"",sel===g.id?"selected":""].join(" ");
+  const label=g.items.map(nounOf).reverse().join(" on ")+(g.g?", stitched":g.on?", on the mask":", on the workbench");
+  return`<g class="${cls}" data-gid="${g.id}" transform="translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) rotate(${g.r})" tabindex="0" role="button" aria-label="${esc(label)}">
+    <circle r="${R-4}" fill="transparent"/><circle class="tring" r="${R}"/><g class="gin">${groupInner(g)}</g>${!g.g&&g.on?`<circle class="loose" r="${R-2}"/>`:""}<circle class="selring" r="${R}"/></g>`;
+}
+const DEFS=`<defs><filter id="fuzz" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="10"/></filter>
+  <filter id="foam" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="2" dy="3" stdDeviation="1.2" flood-color="#000" flood-opacity=".45"/></filter>
+  <clipPath id="clip-side"><rect x="200" y="0" width="200" height="430"/></clipPath>
+  <clipPath id="clip-top"><path d="M0,0 H400 V128 C300,152 100,152 0,128 Z"/></clipPath></defs>`;
+function maskBaseSVG(){
+  const m=S.mask,M=MASKS[m.type],d=M.d+" "+M.holes.map(h=>`M${h.x-h.rx},${h.y} a${h.rx},${h.ry} 0 1,0 ${2*h.rx},0 a${h.rx},${h.ry} 0 1,0 ${-2*h.rx},0 Z`).join(" ");
+  let s=`<path d="${d}" fill="${COLORS[m.color].h}" fill-rule="evenodd" stroke="rgba(0,0,0,.4)" stroke-width="2"/>`;
+  if(m.split!=="none")s+=`<path d="${d}" fill="${COLORS[m.color2].h}" fill-rule="evenodd" clip-path="url(#clip-${m.split})"/>`;
+  return s;
+}
+const holesSVG=()=>MASKS[S.mask.type].holes.map(h=>`<ellipse class="hole" cx="${h.x}" cy="${h.y}" rx="${h.rx}" ry="${h.ry}"/>`).join("");
+/* finished-mask picture: base + stitched groups + holes cut through */
+let picN=0;
+function maskPicture(){return maskBaseSVG()+S.groups.filter(g=>g.on&&g.g).map(g=>`<g transform="translate(${g.x} ${g.y}) rotate(${g.r})">${g.items.map(it=>itemSVG(it,"B")).join("")}</g>`).join("")+inkLayer(S.ink,"mp"+(picN++))+
+  MASKS[S.mask.type].holes.map(h=>`<ellipse cx="${h.x}" cy="${h.y}" rx="${h.rx}" ry="${h.ry}" fill="#fffdf6" stroke="#2b2140" stroke-width="1.5"/>`).join("")}
+
+/* ---------- MARKER INK ---------- */
+const strokeD=pts=>pts.length===1?`M${pts[0][0]},${pts[0][1]} l0.1,0`:"M"+pts.map(p=>p[0]+","+p[1]).join(" L");
+const strokeSVG=k=>`<path d="${strokeD(k.pts)}" fill="none" stroke="${INK[k.c].h}" stroke-width="${INKW[k.w]}" stroke-linecap="round" stroke-linejoin="round"/>`;
+function inkClip(id){const M=MASKS[S.mask.type];return`<clipPath id="${id}"><path clip-rule="evenodd" d="${M.d} ${M.holes.map(h=>`M${h.x-h.rx},${h.y} a${h.rx},${h.ry} 0 1,0 ${2*h.rx},0 a${h.rx},${h.ry} 0 1,0 ${-2*h.rx},0 Z`).join(" ")}"/></clipPath>`}
+const inkLayer=(list,id)=>`${inkClip(id)}<g clip-path="url(#${id})" id="${id}L">${list.map(strokeSVG).join("")}</g>`;
+const inkCount=()=>S.ink.reduce((a,k)=>a+k.pts.length,0);
+
+/* ---------- STAGE RENDER ---------- */
+const svg=$("stage");
+function render(){
+  let h=DEFS+`<rect x="0" y="0" width="400" height="540" fill="var(--stage)"/>`;
+  h+=`<line x1="200" y1="8" x2="200" y2="418" stroke="rgba(255,255,255,.07)" stroke-dasharray="4 6"/>`;
+  h+=`<rect class="bench" x="4" y="428" width="392" height="108" rx="14"/><text class="benchtx" x="16" y="446">WORKBENCH</text>`;
+  h+=maskBaseSVG();
+  const glued=S.groups.filter(g=>g.on&&g.g),loose=S.groups.filter(g=>!(g.on&&g.g));
+  h+=glued.map(groupSVG).join("")+inkLayer(S.ink,"inkc")+holesSVG()+(mode==="ink"?"":loose.map(groupSVG).join(""));
+  svg.innerHTML=h;
+  renderTools();save();
+}
+function flash(g,text){const el=svg.querySelector(`[data-gid="${g.id}"] .gin`);if(el){el.classList.add("glow")}
+  if(text){svg.insertAdjacentHTML("beforeend",`<text class="burst" x="${g.x}" y="${g.y-groupR(g)-6}" text-anchor="middle">${text}</text>`);setTimeout(()=>{const b=svg.querySelector(".burst");b&&b.remove()},1100)}}
+
+/* ---------- PIECES ---------- */
+function freeSpot(){for(let row=0;row<2;row++)for(let x=62;x<=340;x+=55){const y=row?505:470;if(!S.groups.some(g=>!g.on&&Math.hypot(g.x-x,g.y-y)<34))return[x,y]}return[60+Math.random()*280,480]}
+function cut(sh,mat){
+  if(S.groups.length>=40){toast("The workbench is full! Toss a few scraps first.");return}
+  const c=S.craft,[x,y]=freeSpot();
+  const g={id:S.nid++,items:[{sh,c:c.color,m:mat||c.mat,z:c.size,dx:0,dy:0,r:0,f:false}],x,y,r:0,on:false,g:false,tw:null};
+  S.groups.push(g);sel=g.id;sfx.snip();render();
+}
+function unlink(g){if(g.tw){const t=G(g.tw);if(t)t.tw=null;g.tw=null}}
+function mirrorTo(src,dst){dst.x=400-src.x;dst.y=src.y;dst.r=-src.r;dst.on=src.on;
+  dst.items=src.items.map(it=>({...it,dx:-it.dx,r:-(it.r||0),f:!it.f}))}
+function stackOnto(src,dst){
+  if(pieceCount(dst)+pieceCount(src)>MAXSTACK){toast("That stack is tall enough — try a new one!");sfx.nope();return false}
+  if(dst.items[dst.items.length-1].m==="pom"){toast("Nothing sticks to a fuzzy pom-pom — pom-poms go on top!");sfx.nope();return false}
+  for(const it of src.items){const[wx,wy]=rot(it.dx,it.dy,src.r);const[lx,ly]=rot(src.x+wx-dst.x,src.y+wy-dst.y,-dst.r);
+    dst.items.push({...it,dx:lx,dy:ly,r:((it.r||0)+src.r-dst.r)%360})}
+  unlink(src);unlink(dst);S.groups=S.groups.filter(g=>g!==src);sel=dst.id;sfx.paste();return true;
+}
+function topTarget(drag,x,y){
+  const skip=new Set([drag.id,drag.tw]);
+  const list=S.groups.filter(g=>!skip.has(g.id)&&!g.g);
+  for(let i=list.length-1;i>=0;i--){const g=list[i];for(const w of worldItems(g))if(Math.hypot(x-w.x,y-w.y)<w.R*.85)return g}
+  return null;
+}
+
+/* ---------- DRAG ---------- */
+let drag=null;
+const toSvg=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());return[q.x,q.y]};
+let pen=null;
+function inkStart(e){const[x,y]=toSvg(e);if(y>425)return;
+  if(inkCount()>=MAXINK){toast("Your markers are out of ink! Undo some lines to keep drawing.");sfx.nope();return}
+  pen={k:{c:S.pen.c,w:S.pen.w,pts:[[Math.round(x),Math.round(y)]],m:S.pen.mirror?1:0}};
+  const g=document.getElementById("inkcL");g.insertAdjacentHTML("beforeend",strokeSVG(pen.k));pen.el=g.lastElementChild;pen.elM=null;
+  if(pen.k.m){g.insertAdjacentHTML("beforeend",strokeSVG({...pen.k,pts:mirPts(pen.k.pts)}));pen.elM=g.lastElementChild}
+  svg.setPointerCapture(e.pointerId);e.preventDefault()}
+const mirPts=pts=>pts.map(p=>[400-p[0],p[1]]);
+svg.addEventListener("pointerdown",e=>{
+  if(mode==="ink"){inkStart(e);return}
+  const el=e.target.closest(".pc");
+  if(!el){if(sel!==null){sel=null;render()}return}
+  const g=G(+el.dataset.gid);if(!g)return;
+  sel=g.id;
+  if(g.g){render();return}
+  const[x,y]=toSvg(e);drag={g,ox:x-g.x,oy:y-g.y,moved:false,target:null};
+  /* bring dragged group (and twin) to the front while moving */
+  S.groups=S.groups.filter(o=>o!==g).concat(g);
+  render();svg.setPointerCapture(e.pointerId);e.preventDefault();
+});
+svg.addEventListener("pointermove",e=>{
+  if(pen){const[x,y]=toSvg(e),pts=pen.k.pts,l=pts[pts.length-1],q=[Math.round(x),Math.round(Math.min(425,y))];
+    if(Math.hypot(q[0]-l[0],q[1]-l[1])>=3){pts.push(q);pen.el.setAttribute("d",strokeD(pts));if(pen.elM)pen.elM.setAttribute("d",strokeD(mirPts(pts)))}return}
+  if(!drag)return;const[x,y]=toSvg(e),g=drag.g;
+  g.x=Math.max(10,Math.min(390,x-drag.ox));g.y=Math.max(10,Math.min(530,y-drag.oy));drag.moved=true;
+  const el=svg.querySelector(`[data-gid="${g.id}"]`);el&&el.setAttribute("transform",`translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) rotate(${g.r})`);
+  if(g.tw){const t=G(g.tw);if(t&&!t.g){t.x=400-g.x;t.y=g.y;const te=svg.querySelector(`[data-gid="${t.id}"]`);te&&te.setAttribute("transform",`translate(${t.x.toFixed(1)} ${t.y.toFixed(1)}) rotate(${t.r})`)}}
+  const tg=topTarget(g,g.x,g.y);
+  if(tg!==drag.target){svg.querySelectorAll(".pc.target").forEach(n=>n.classList.remove("target"));drag.target=tg;if(tg){const te=svg.querySelector(`[data-gid="${tg.id}"]`);te&&te.classList.add("target")}}
+});
+function endDrag(){
+  if(pen){const k=pen.k;pen=null;S.ink.push(k);
+    /* a mirrored line is stored as its own stroke so the workbook can draw it like any other */
+    if(k.m&&!(k.pts.every(p=>Math.abs(p[0]-200)<4)))S.ink.push({c:k.c,w:k.w,pts:mirPts(k.pts),m:2});
+    render();return}
+  if(!drag)return;const{g,moved,target}=drag;drag=null;
+  if(!moved){render();return}
+  if(target&&stackOnto(g,target)){render();flash(target,"PASTED!");return}
+  dropPlace(g);
+  if(g.tw){const t=G(g.tw);if(t&&!t.g){t.x=400-g.x;t.y=g.y;t.on=g.on}}
+  render();
+}
+function dropPlace(g){
+  if(g.y<420&&insideMask(g.x,g.y,1.3)){if(!g.on)toast("On the mask! Tap 🧵 Stitch to glue it down.");g.on=true}
+  else{if(g.y<420)toast("Pieces have to touch the mask — back to the workbench!");g.on=false;if(g.y<430){const[x,y]=freeSpot();g.x=x;g.y=y}}
+}
+svg.addEventListener("pointerup",endDrag);svg.addEventListener("pointercancel",endDrag);
+svg.addEventListener("keydown",e=>{
+  const el=e.target.closest&&e.target.closest(".pc");
+  if(el&&(e.key==="Enter"||e.key===" ")){sel=+el.dataset.gid;render();const n=svg.querySelector(`[data-gid="${sel}"]`);n&&n.focus();e.preventDefault();return}
+  const g=G(sel);if(!g||g.g)return;
+  const mv={ArrowLeft:[-6,0],ArrowRight:[6,0],ArrowUp:[0,-6],ArrowDown:[0,6]}[e.key];if(!mv)return;
+  g.x=Math.max(10,Math.min(390,g.x+mv[0]));g.y=Math.max(10,Math.min(530,g.y+mv[1]));g.on=g.y<420&&insideMask(g.x,g.y,1.3);
+  if(g.tw){const t=G(g.tw);if(t){t.x=400-g.x;t.y=g.y;t.on=g.on}}
+  render();const n=svg.querySelector(`[data-gid="${g.id}"]`);n&&n.focus();e.preventDefault();
+});
+
+/* ---------- TOOLS ---------- */
+function nounOf(it){const sz=SIZES[it.z].n,c=COLORS[it.c].n;if(it.bd)return`${bdWord(it.bd)}-inch ${c} border${it.m==="foam"?" (foam)":""}`;return it.m==="pom"?`${sz} ${c} pom-pom`:`${sz} ${c} ${SHAPES[it.sh].n}${it.m==="foam"?" (foam)":""}`}
+function borderBtn(g){const n=g.items.length,top=g.items[n-1],below=n>1?g.items[n-2]:null;
+  if(top.m==="pom")return"";
+  if(below&&below.bd)return below.bd===BW.thin?`<button class="btn" data-a="border">🖍 Border: make it thicker</button>`:`<button class="btn" data-a="border">🖍 Remove border</button>`;
+  return`<button class="btn" data-a="border">🖍 Add ${COLORS[S.craft.color].n} border</button>`}
+let eraseArm=0;
+function renderInkTools(t){
+  const p=S.pen;
+  t.innerHTML=`<div class="inkrow">${Object.entries(INK).map(([k,c])=>`<button type="button" class="sw" data-ink="${k}" style="background:${c.h}" aria-label="${c.n}${c.p?" paint pen":" marker"}" title="${c.n}${c.p?" paint pen":" marker"}" aria-pressed="${k===p.c}"></button>`).join("")}</div>
+   <div class="inkrow"><div class="seg" role="group" aria-label="Marker tip"><button type="button" data-w="fine" aria-pressed="${p.w==="fine"}">Fine tip</button><button type="button" data-w="thick" aria-pressed="${p.w==="thick"}">Thick</button></div>
+   <button class="btn ${p.mirror?"on":""}" data-i="mirror" aria-pressed="${p.mirror}">🪞 Mirror draw</button>
+   <button class="btn" data-i="undo" ${S.ink.length?"":"disabled"}>↶ Undo</button>
+   <button class="btn" data-i="erase" ${S.ink.length?"":"disabled"}>🧽 Erase all</button></div>
+   <p class="hint">Draw on the mask with your finger or mouse.${INK[p.c].p?" Gold, silver and white are <b>paint pens</b> — great on dark paper.":""}</p>`;
+}
+$("tools").addEventListener("click",e=>{if(mode!=="ink")return;const b=e.target.closest("button");if(!b)return;const p=S.pen;
+  if(b.dataset.ink){p.c=b.dataset.ink;sfx.snip()}
+  else if(b.dataset.w){p.w=b.dataset.w}
+  else if(b.dataset.i==="mirror"){p.mirror=!p.mirror;toast(p.mirror?"🪞 Mirror draw on — both sides match!":"Mirror draw off.")}
+  else if(b.dataset.i==="undo"){const k=S.ink.pop();if(k&&k.m===2)S.ink.pop();sfx.peel()}
+  else if(b.dataset.i==="erase"){if(!eraseArm){eraseArm=setTimeout(()=>{eraseArm=0;renderTools()},3000);b.textContent="⚠ Tap again to erase";b.classList.add("warn");return}
+    clearTimeout(eraseArm);eraseArm=0;S.ink=[];sfx.nope();toast("All marker lines erased.")}
+  render()});
+function renderTools(){
+  const t=$("tools"),g=G(sel);
+  if(mode==="ink"){renderInkTools(t);return}
+  if(!g){t.innerHTML=`<p class="hint">✂ Tap a shape in the Craft Box. Drag pieces onto each other to <b>stack</b>, onto the mask to <b>place</b>, then tap one and <b>🧵 Stitch</b> it on.</p>`;return}
+  const twin=g.tw&&G(g.tw);
+  const where=g.on?zoneOf(g.x,g.y):"on the workbench";
+  let h=`<div class="selinfo">${g.items.length>1?`Stack of ${g.items.length}: `:""}${esc(g.items.map(nounOf).join(" + "))} · ${esc(where)}${twin?" · 🪞 has a twin":""}</div>`;
+  if(g.g)h+=`<button class="btn unstitch" data-a="unstitch">✂ Unstitch</button>`;
+  else h+=`<button class="btn stitch" data-a="stitch" ${g.on?"":"disabled title='Drag it onto the mask first'"}>🧵 Stitch onto mask</button>
+    <button class="btn" data-a="turn">↻ Turn</button>
+    ${twin?`<button class="btn" data-a="untwin">💔 Split twins</button>`:`<button class="btn" data-a="twin">🪞 Matching twin</button>`}
+    ${borderBtn(g)}
+    ${pieceCount(g)>1?`<button class="btn" data-a="pop">⬆ Pop off top piece</button>`:""}
+    <button class="btn" data-a="toss">🗑 Toss</button>`;
+  h+=`<button class="btn" data-a="done">✓ Done</button>`;
+  t.innerHTML=h;
+}
+$("tools").addEventListener("click",e=>{
+  if(mode==="ink")return;
+  const b=e.target.closest("button[data-a]");if(!b)return;const g=G(sel);if(!g&&b.dataset.a!=="done")return;
+  const twin=g&&g.tw?G(g.tw):null,a=b.dataset.a;
+  if(a==="done"){sel=null;render();return}
+  if(a==="stitch"){for(const x of [g,twin])if(x&&x.on){x.g=true;S.groups=S.groups.filter(o=>o!==x).concat(x)}sfx.glue();render();flash(g,"STITCHED!");if(twin)flash(twin)}
+  if(a==="unstitch"){for(const x of [g,twin])if(x)x.g=false;sfx.peel();toast("Peeled off! Drag it somewhere new.");render()}
+  if(a==="turn"){g.r=(g.r+15)%360;if(twin)twin.r=-g.r;sfx.snip();render()}
+  if(a==="twin"){
+    if(S.groups.length>=40){toast("The workbench is full!");return}
+    const t={id:S.nid++,items:[],x:0,y:0,r:0,on:false,g:false,tw:g.id};g.tw=t.id;mirrorTo(g,t);S.groups.push(t);
+    if(Math.abs(g.x-200)<30)toast("Twin made! Slide it to one side to see both.");else toast("🪞 Twin made! They move together like a mirror.");
+    sfx.paste();render();flash(t)}
+  if(a==="border"){const n=g.items.length,top=g.items[n-1],below=n>1?g.items[n-2]:null;let msg;
+    if(below&&below.bd){if(below.bd===BW.thin){below.bd=BW.thick;msg="Thick border — ½ inch all around!"}else{g.items.splice(n-2,1);msg="Border removed."}}
+    else{if(S.craft.color===top.c){toast("Pick a different color in the Craft Box so the border shows!");sfx.nope();return}
+      g.items.splice(n-1,0,{...top,c:S.craft.color,m:S.craft.mat==="foam"?"foam":"paper",bd:BW.thin});msg="🖍 Border added — a slightly bigger copy cut from "+COLORS[S.craft.color].n+(S.craft.mat==="foam"?" foam.":" paper.");}
+    if(twin)mirrorTo(g,twin);toast(msg);sfx.snip();render();flash(g);if(twin)flash(twin)}
+  if(a==="untwin"){unlink(g);toast("Twins split — they move on their own now.");render()}
+  if(a==="pop"){const it=g.items.pop();const bdr=g.items.length&&g.items[g.items.length-1].bd?g.items.pop():null;const[wx,wy]=rot(it.dx,it.dy,g.r);
+    const n={id:S.nid++,items:[...(bdr?[{...bdr,dx:0,dy:0,r:((bdr.r||0)+g.r)%360}]:[]),{...it,dx:0,dy:0,r:((it.r||0)+g.r)%360}],x:Math.min(380,g.x+wx+40),y:g.y+wy,r:0,on:false,g:false,tw:null};
+    unlink(g);dropPlace(n);S.groups.push(n);sel=n.id;sfx.peel();render()}
+  if(a==="toss"){unlink(g);S.groups=S.groups.filter(x=>x!==g);sel=null;sfx.nope();render()}
+});
+
+/* ---------- PANELS ---------- */
+function seg(id,val,on){const el=$(id);el.querySelectorAll("button").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.v===val));b.onclick=()=>on(b.dataset.v)})}
+function swatches(id,val,on){const el=$(id);el.innerHTML=Object.entries(COLORS).map(([k,c])=>`<button type="button" class="sw" data-v="${k}" style="background:${c.h}" aria-label="${c.n}" title="${c.n}" aria-pressed="${k===val}"></button>`).join("");
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>on(b.dataset.v))}
+function renderPanels(){
+  const m=S.mask,c=S.craft;
+  seg("modeSeg",mode,v=>{mode=v;sel=null;svg.classList.toggle("inking",v==="ink");renderPanels();render();if(v==="ink")toast("🖍 Marker time! Draw right on the mask.")});
+  seg("maskType",m.type,v=>{m.type=v;if(!MASKS[v].splits.includes(m.split))m.split="none";
+    for(const g of S.groups)if(g.on&&!insideMask(g.x,g.y,1.3)){g.on=false;g.g=false;const[x,y]=freeSpot();g.x=x;g.y=y;}
+    renderPanels();render()});
+  $("splitSeg").innerHTML=MASKS[m.type].splits.map(s=>`<button type="button" data-v="${s}">${SPLITN[s]}</button>`).join("");
+  seg("splitSeg",m.split,v=>{m.split=v;renderPanels();render()});
+  $("c2wrap").hidden=m.split==="none";
+  swatches("maskColors",m.color,v=>{m.color=v;renderPanels();render()});
+  swatches("maskColors2",m.color2,v=>{m.color2=v;renderPanels();render()});
+  seg("matSeg",c.mat,v=>{c.mat=v;renderPanels();save()});
+  seg("sizeSeg",c.size,v=>{c.size=v;renderPanels();save()});
+  swatches("craftColors",c.color,v=>{c.color=v;renderPanels();save()});
+  const col=COLORS[c.color].h;
+  $("shapeGrid").innerHTML=Object.entries(SHAPES).map(([k,s])=>`<button type="button" data-sh="${k}" aria-label="Cut out a ${s.n}"><svg viewBox="-55 -55 110 110"><path d="${s.d}" fill="${col}" fill-rule="evenodd" stroke="rgba(0,0,0,.4)" stroke-width="3" ${c.mat==="foam"?'filter="url(#foamIcon)"':""}/></svg>${s.n.replace("lightning ","")}</button>`).join("")+
+    `<button type="button" data-sh="pom" aria-label="Add a pom-pom"><svg viewBox="-55 -55 110 110"><circle r="40" fill="${col}" stroke="rgba(0,0,0,.3)" stroke-width="3" stroke-dasharray="3 4"/></svg>pom-pom</button>`;
+  $("shapeGrid").querySelectorAll("button").forEach(b=>b.onclick=()=>b.dataset.sh==="pom"?cut("circle","pom"):cut(b.dataset.sh));
+  /* hero */
+  const nm=$("heroName");if(document.activeElement!==nm)nm.value=S.hero.name;
+  $("words").innerHTML=WORDS.map(w=>`<button type="button" data-w="${w}" aria-pressed="${w===S.hero.word}">${w}</button>`).join("");
+  $("words").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.hero.word=b.dataset.w;renderPanels();save()});
+  $("motto").textContent=`“Their ${S.hero.word} Is My Own!”`;
+}
+$("heroName").addEventListener("input",e=>{S.hero.name=e.target.value.slice(0,24);save()});
+$("diceBtn").onclick=()=>{let n;do{n=NAMES[Math.floor(Math.random()*NAMES.length)]}while(n===S.hero.name);S.hero.name=n;sfx.snip();renderPanels();save()};
+
+/* ---------- PRESET + NEW ---------- */
+$("presetBtn").onclick=()=>{
+  const id=()=>S.nid++;
+  S.hero={name:"Professor Lightning",word:"Dream"};
+  S.mask={type:"half",color:"purple",split:"none",color2:"lime"};
+  const ringL={id:id(),items:[{sh:"ring",c:"lime",m:"paper",z:"L",dx:0,dy:0,r:0,f:false}],x:142,y:178,r:0,on:true,g:true,tw:null};
+  const ringR={id:id(),items:[],x:0,y:0,r:0,on:true,g:true,tw:ringL.id};ringL.tw=ringR.id;mirrorTo(ringL,ringR);
+  const badge={id:id(),items:[{sh:"circle",c:"black",m:"foam",z:"M",dx:0,dy:0,r:0,f:false},{sh:"bolt",c:"lime",m:"paper",z:"S",dx:0,dy:0,r:0,f:false}],x:200,y:150,r:0,on:true,g:true,tw:null};
+  S.groups=[ringL,ringR,badge];S.ink=[];sel=null;sfx.glue();renderPanels();render();toast("⚡ Professor Lightning's mask loaded — now make your own!");
+};
+let newArm=0;
+$("newBtn").onclick=()=>{const b=$("newBtn");
+  if(!newArm){newArm=setTimeout(()=>{newArm=0;b.textContent="🆕 New mask";b.classList.remove("warn")},3500);b.textContent="⚠ Tap again to clear";b.classList.add("warn");return}
+  clearTimeout(newArm);newArm=0;b.textContent="🆕 New mask";b.classList.remove("warn");
+  const craft=S.craft,pn=S.pen;S=fresh();S.craft=craft;S.pen=pn;sel=null;renderPanels();render();toast("Fresh paper! Invent a new hero.");
+};
+
+/* ---------- WORKBOOK GENERATOR ----------
+   One pass over the stitched groups in stacking order. Each group is visited once to tally supplies,
+   once to write its build steps (bottom → top, the order the pieces were pasted), and once to write its
+   glue step (mask order). Overlap checks only look backwards at groups already placed, so the order is
+   always the same order the kid stacked things — no searching through combinations. */
+function fmtIn(px){const q=Math.max(.25,Math.round(px/PX_IN*4)/4),w=Math.floor(q),fr={0:"",.25:"¼",.5:"½",.75:"¾"}[q-w];return(w?String(w):"")+fr}
+function sizeWords(it){const s=SIZES[it.z],dia=100*s.s;return SHAPES[it.sh].thin?`about ${fmtIn(dia)} in long`:`about ${fmtIn(dia)} in across — ${s.hint}`}
+function plural(n,word){if(n===1)return"1 "+word;return n+" "+(/leaf$/.test(word)?word.replace(/leaf$/,"leaves"):word+"s")}
+const DIRS=["right","bottom-right","bottom","bottom-left","left","top-left","top","top-right"];
+function placeWords(base,it,g){
+  const[vx,vy]=rot(it.dx-base.dx,it.dy-base.dy,g.r),d=Math.hypot(vx,vy)/itemR(base);
+  if(d<.25)return"right in the middle";
+  const dir=DIRS[((Math.round(Math.atan2(vy,vx)/(Math.PI/4))%8)+8)%8];
+  if(d>.95)return`hanging over the ${dir} edge`;
+  return d>.55?`near the ${dir} edge`:`a little toward the ${dir}`;
+}
+function tiltWords(r){r=((r%360)+540)%360-180;if(Math.abs(r)<10)return"";return Math.abs(r)>60?" Turn it sideways.":` Tilt it a little to the ${r>0?"right":"left"}.`}
+function miniGroup(g,size=96,twinFlip=false){
+  const R=groupR(g)+4;const items=twinFlip?g.items.map(it=>({...it,dx:-it.dx,r:-(it.r||0),f:!it.f})):g.items,r=twinFlip?-g.r:g.r;
+  return`<svg width="${size}" height="${size}" viewBox="${-R} ${-R} ${2*R} ${2*R}" aria-hidden="true">${DEFS_MINI}<g transform="rotate(${r})">${items.map(it=>itemSVG(it,"B")).join("")}</g></svg>`;
+}
+const DEFS_MINI=`<defs><filter id="fuzzB" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="10"/></filter><filter id="foamB" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="2" dy="3" stdDeviation="1.2" flood-color="#000" flood-opacity=".45"/></filter></defs>`;
+function iconSVG(sh,c,mat){return mat==="pom"?`<svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="42" fill="${COLORS[c].h}" stroke="#2b2140" stroke-width="3" stroke-dasharray="4 4"/></svg>`:
+  `<svg viewBox="-55 -55 110 110" aria-hidden="true"><path d="${SHAPES[sh].d}" fill="${COLORS[c].h}" fill-rule="evenodd" stroke="#2b2140" stroke-width="${mat==="foam"?6:3}"/></svg>`}
+
+function buildWorkbook(){
+  const m=S.mask,M=MASKS[m.type],hero=S.hero.name.trim()||"Your Hero";
+  const mg=S.groups.filter(g=>g.on&&g.g);                  /* stitched, in stacking order */
+  /* units: a group, plus its mirror twin if both are stitched */
+  const seen=new Set(),units=[];
+  for(const g of mg){if(seen.has(g.id))continue;seen.add(g.id);const t=g.tw&&mg.find(o=>o.id===g.tw);if(t)seen.add(t.id);units.push({g,t:t||null})}
+  const label=new Map();let L=0;
+  for(const u of units)if(u.g.items.length>1){const l="Badge "+String.fromCharCode(65+L++);label.set(u.g.id,l);if(u.t)label.set(u.t.id,l+"'s twin")}
+  const nameOf=g=>label.get(g.id)||"the "+nounOf(g.items[0]);
+
+  /* tally (linear) */
+  const sheets=new Map(),poms=new Map(),twinKeys=new Set();let pieces=0,usesFoam=false,usesPom=false;
+  const addSheet=(mat,c)=>{const k=mat+"|"+c;if(!sheets.has(k))sheets.set(k,{mat,c,cuts:new Map()});return sheets.get(k)};
+  addSheet("paper",m.color);if(m.split!=="none")addSheet("paper",m.color2);
+  const borders=new Map();
+  for(const u of units)for(const g of[u.g,u.t])if(g)g.items.forEach((it,ix)=>{
+    pieces++;
+    if(it.bd){const above=g.items[ix+1];if(it.m==="foam")usesFoam=true;addSheet(it.m,it.c);
+      const k=[it.m,it.c,it.sh,it.z,it.bd,above.c,above.m].join("|");const e=borders.get(k)||{it,above,n:0};e.n++;borders.set(k,e);return}
+    if(it.m==="pom"){usesPom=true;const k=it.c+"|"+it.z;poms.set(k,(poms.get(k)||0)+1);return}
+    if(it.m==="foam")usesFoam=true;
+    const sh=addSheet(it.m,it.c),k=it.sh+"|"+it.z;sh.cuts.set(k,(sh.cuts.get(k)||0)+1);if(u.t)twinKeys.add(it.m+"|"+it.c+"|"+k);
+  });
+  /* eye / mouth cover check */
+  const covered=new Set();
+  for(const g of mg)for(const w of worldItems(g))for(const h of M.holes)if(covers(w,h))covered.add(h.n);
+
+  const steps=[];
+  const step=(t,lines,o={})=>steps.push({t,lines,...o});
+  /* marker ink: one pass — a line that crosses a stitched piece is drawn after gluing, everything else on the bare mask first */
+  const gw=mg.flatMap(worldItems),inkBare=[],inkTop=[];
+  for(const k of S.ink)(k.pts.some(p=>gw.some(w=>Math.hypot(p[0]-w.x,p[1]-w.y)<w.R*.8))?inkTop:inkBare).push(k);
+  const inkUsed=(list)=>{const c=new Map();for(const k of list){const e=c.get(k.c)||new Set();e.add(k.w);c.set(k.c,e)}return c};
+  const inkLines=(list,where)=>{const u=inkUsed(list),L=[];
+    L.push(`Look at the picture: it shows only your marker lines, ${where}. The squares are 1 inch, so you can copy one square at a time.`);
+    L.push("Sketch the lines lightly with a pencil first. Then go over them with: "+[...u].map(([c,w])=>`${[...w].map(x=>x==="fine"?"fine-tip":"thick").join(" and ")} ${INK[c].n} ${INK[c].p?"paint pen":"marker"}`).join(", ")+".");
+    if(list.some(k=>k.m))L.push("Some designs are mirror twins — draw one side, then copy it on the other side so they match.");
+    if(DARK.has(m.color)&&list.some(k=>!INK[k.c].p&&!["white","yellow"].includes(k.c)))L.push(`${COLORS[m.color].n[0].toUpperCase()+COLORS[m.color].n.slice(1)} paper is dark and hides most marker colors — press firmly, or swap in a paint pen or gel pen so it shows.`);
+    L.push("It doesn't have to be perfect — heroes add their own style!");return L};
+
+  /* 1 supplies */
+  const sup=[];
+  for(const s of sheets.values())sup.push(`${s.mat==="foam"?"Craft foam sheet":"Construction paper"}: ${COLORS[s.c].n}`);
+  for(const[k,n]of poms){const[c,z]=k.split("|");sup.push(`${plural(n,SIZES[z].n+" "+COLORS[c].n+" pom-pom")}`)}
+  {const u=inkUsed(S.ink),mk=[...u.keys()].filter(c=>!INK[c].p),pp=[...u.keys()].filter(c=>INK[c].p);
+   if(mk.length)sup.push("Markers: "+mk.map(c=>INK[c].n).join(", "));if(pp.length)sup.push("Paint pens: "+pp.map(c=>INK[c].n).join(", "));}
+  sup.push("Kid-safe scissors","Glue stick"+(usesFoam||usesPom?" + white school glue (for foam and pom-poms)":""),"Pencil","Hole punch","String or yarn — 2 pieces, each as long as your arm","A grown-up helper for the ✋ steps");
+  step("Gather your supplies",sup);
+
+  /* 2 template */
+  step(`Cut out your ${M.n}`,[`Use the ${COLORS[m.color].n} construction paper.`,M.fold,"Cut through both layers along your line, then unfold. Both sides match!"],{pic:"template"});
+
+  /* 3 two-tone */
+  if(m.split==="side")step("Add the second color",[`Lay your mask on the ${COLORS[m.color2].n} paper and trace around it. Cut it out.`,`Fold the new shape in half and cut along the fold.`,`Glue one half over the right side of your mask (right as you look at it), lining up the edges.`]);
+  if(m.split==="top")step("Add the forehead cap",[`Lay your mask on the ${COLORS[m.color2].n} paper and trace just the top part, down to a little above the eyes.`,`Draw a gentle smile-shaped curve across the bottom of the cap, then cut it out.`,`Glue the cap onto the top of your mask.`]);
+
+  /* 4 eye holes */
+  step(m.type==="full"?"Cut the eye and mouth holes":"Cut the eye holes",[
+    `Hold the mask up to your face and gently mark where your eyes are with a pencil.`,
+    `A grown-up pokes the scissors through and cuts out almond-shaped eye holes, about 1½ in wide.`+(m.split!=="none"?" Cut through both layers of paper.":""),
+    ...(m.type==="full"?["Cut a small oval for the mouth, about 1½ in wide."]:[])],{grown:1});
+
+  if(inkBare.length)step("Draw your marker designs",[...inkLines(inkBare,"on the bare mask"),"Let the ink dry for 2 minutes so it doesn't smear when you glue."],{ink:inkBare});
+  if(!units.length){
+    step("Keep it bold",["Your mask is plain and strong — lucha legends started that way!","Want decorations? Go back to the studio and stitch some pieces on."]);
+  }else{
+    /* 5 cut pieces, batched by sheet */
+    const cl=[];let tips=new Set();
+    for(const s of sheets.values()){if(!s.cuts.size)continue;
+      const rows=[...s.cuts].map(([k,n])=>{const[sh,z]=k.split("|"),it={sh,z};
+        if(twinKeys.has(s.mat+"|"+s.c+"|"+k))tips.add("Making twins? Fold your paper in half and cut once — you get 2 that match perfectly.");
+        if(SHAPES[sh].fold)tips.add(SHAPES[sh].fold);
+        return{sh,c:s.c,mat:s.mat,txt:`${plural(n,SIZES[z].n+" "+SHAPES[sh].n)} (${sizeWords(it)})`}});
+      cl.push({head:`From the ${COLORS[s.c].n} ${s.mat==="foam"?"foam":"paper"}:`,rows});
+    }
+    if(usesFoam)tips.add("Foam is thick — squeeze the scissors slowly. Draw on the back so the pencil marks don't show.");
+    if(cl.length)step("Cut out your pieces",[],{cut:cl,tips:[...tips]});
+    if(borders.size){
+      const rows=[...borders.values()].map(b=>{const pn=SIZES[b.it.z].n+" "+COLORS[b.above.c].n+" "+SHAPES[b.it.sh].n;
+        return{b,txt:`From the ${COLORS[b.it.c].n} ${b.it.m==="foam"?"foam":"paper"}: ${plural(b.n,"border")} for your ${b.n>1?plural(b.n,pn).replace(/^\d+ /,""):pn} — ${bdWord(b.it.bd)} in bigger all around`}});
+      const bl=["Borders are a second, slightly bigger copy of a piece, so cut them after the pieces they go behind.",
+        "Lay the piece on the border paper and trace around it with a pencil.",
+        "Draw a second line outside your tracing, the border width away from it, all the way around — like a shadow that's a little bigger. Round off the sharp points.",
+        "Cut on the OUTSIDE line. Now you have two templates: your piece and its bigger twin."];
+      if([...borders.values()].some(b=>SHAPES[b.it.sh].ring))bl.push("For a ring, also draw the inside line a little smaller than the hole, so the border shows on the inside edge too.");
+      step("Cut the borders",bl,{borders:rows});
+    }
+
+    /* 6 build badges (bottom → top) */
+    for(const u of units){if(u.g.items.length<2)continue;const g=u.g,base=g.items[0],lines=[];
+      lines.push(base.bd?`Start with the ${nounOf(base)} for the ${nounOf(g.items[1])}. Lay it flat.`:`Start with the ${nounOf(base)}. Lay it flat.`);
+      for(let i=1;i<g.items.length;i++){const it=g.items[i],p=placeWords(base,it,g),prev=g.items[i-1];
+        if(prev.bd&&!it.bd){lines.push(`Glue the ${nounOf(it)} onto its border, lined up so the border peeks out evenly all around.`);continue}
+        if(it.bd){lines.push(`Glue the ${nounOf(it)} (for the ${nounOf(g.items[i+1])}) on top, ${p}.`);continue}
+        lines.push(it.m==="pom"?`Put a dot of white glue ${p} and press the ${nounOf(it)} on for 10 seconds.`:
+          `Glue the ${nounOf(it)} on top, ${p}.`+tiltWords(it.r||0).replace(" it "," this piece "));}
+      if(u.t)lines.push("Now build a second one, its mirror twin: same pieces, but flipped the other way (just like the second picture).");
+      step(`Paste together ${label.get(g.id)}`,lines,{group:g,twin:!!u.t});
+    }
+
+    /* 7 glue onto mask in stacking order */
+    const gl=["Left and right mean as you look at the mask lying in front of you.","Glue the pieces on in this order — the first ones end up underneath."];
+    units.forEach((u,ui)=>{const g=u.g;
+      const glue=g.items[0].m==="foam"||g.items[0].m==="pom"?" with white glue":"";
+      let s;
+      if(u.t)s=`Glue one ${label.has(g.id)?label.get(g.id):nounOf(g.items[0])}${glue} ${zoneOf(g.x,g.y)}, and its twin ${zoneOf(u.t.x,u.t.y)} so they match like a mirror.`;
+      else s=`Glue ${nameOf(g)}${glue} ${zoneOf(g.x,g.y)}.`;
+      /* look only backwards: what is already on the mask underneath? */
+      let under=null;for(let j=ui-1;j>=0&&!under;j--){for(const o of[units[j].g,units[j].t])if(o&&!under){
+        const a=worldItems(o);for(const w of worldItems(g))if(a.some(b=>Math.hypot(b.x-w.x,b.y-w.y)<(b.R+w.R)*.75)){under=o;break}}}
+      if(under)s+=` It goes on top of ${nameOf(under).replace(/'s twin$/,"")}${under.tw&&mg.some(o=>o.id===under.tw)?" twins":""}.`;
+      s+=tiltWords(g.r);
+      if(overhangs(g)||(u.t&&overhangs(u.t)))s+=" Let it stick out past the edge — glue the part that touches the mask and hold it for 10 seconds.";
+      gl.push(s)});
+    step("Glue everything onto your mask",gl,{pic:"final"});
+  }
+
+  step("Let it dry",["Lay the mask flat for 15 minutes. Pom-poms and foam need the full time!","While you wait, practice your hero voice."]);
+  if(inkTop.length)step("Now draw your marker designs on top",[...inkLines(inkTop,"with your glued pieces shown faded so you can see where they go"),...(usesPom?["Don't draw on pom-poms — markers just soak into the fuzz."]:[])],{ink:inkTop,inkPieces:1});
+  if(covered.size)step("Open the eye holes again",[`Some pieces cover the ${[...covered].join(" and ")}. A grown-up carefully snips the paper away through the hole you already cut, so you can see (and breathe) like a hero.`],{grown:1});
+  step("Add the string",[M.string,"Put a small piece of tape over each spot first so the holes don't tear.","Thread one string through each hole and tie a double knot.","Tie the strings behind your head in a bow — not too tight!"],{grown:1});
+  step(`Become ${hero}!`,[],{hero:1});
+  const est=25+3*pieces;
+  return{steps,hero,est,pieces};
+}
+
+function renderBook(){
+  const W=buildWorkbook(),m=S.mask,M=MASKS[m.type];
+  const word=S.hero.word,pose=POSES[[...W.hero].reduce((a,c)=>a+c.charCodeAt(0),0)%POSES.length];
+  const stars=W.pieces<4?"★☆☆":W.pieces<9?"★★☆":"★★★";
+  let h=`<div class="kicker">⚡ Professor Lightning's Rainy-Day Workbook</div><h2>Make the mask of ${esc(W.hero)}</h2>
+    <div class="meta"><span>⏱ about ${W.est} minutes</span><span>Difficulty ${stars}</span><span>✋ = grown-up helper step</span></div>`;
+  const txt=[`PROFESSOR LIGHTNING'S RAINY-DAY WORKBOOK`,`Make the mask of ${W.hero}`,`About ${W.est} minutes · ✋ = grown-up helper step`,""];
+  W.steps.forEach((s,i)=>{
+    h+=`<section class="step${s.grown?" grown":""}"><div class="num">${i+1}</div><div><h3>${esc(s.t)}${s.grown?'<span class="gu">✋ grown-up</span>':""}</h3>`;
+    txt.push(`${i+1}. ${s.t}${s.grown?" ✋":""}`);
+    if(s.lines.length){h+=`<ul>${s.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`;s.lines.forEach(l=>txt.push("   - "+l))}
+    if(s.cut){for(const c of s.cut){h+=`<p style="margin:8px 0 4px;font-weight:900">${esc(c.head)}</p><ul class="cutlist">${c.rows.map(r=>`<li>${iconSVG(r.sh,r.c,r.mat)}<span>${esc(r.txt)}</span></li>`).join("")}</ul>`;
+      txt.push("   "+c.head);c.rows.forEach(r=>txt.push("     • "+r.txt))}}
+    if(s.borders){h+=`<ul class="cutlist" style="margin-top:8px">${s.borders.map(r=>`<li>${iconSVG(r.b.it.sh,r.b.it.c,r.b.it.m)}<span>${esc(r.txt)}</span></li>`).join("")}</ul><div class="pics">${s.borders.slice(0,6).map(r=>{const b=r.b,R=itemR(b.it)+4,sc=SIZES[b.it.z].s;
+        return`<figure><svg width="96" height="96" viewBox="${-R} ${-R} ${2*R} ${2*R}" aria-hidden="true">${DEFS_MINI}<g transform="rotate(${b.it.r||0}) scale(${b.it.f?-1:1} 1)">${itemSVG({...b.it,dx:0,dy:0,r:0,f:false},"B")}<path d="${SHAPES[b.it.sh].d}" transform="scale(${sc})" fill="none" stroke="#fffdf6" stroke-width="${3.5/sc}"/><path d="${SHAPES[b.it.sh].d}" transform="scale(${sc})" fill="none" stroke="#c2410c" stroke-width="${2/sc}" stroke-dasharray="${5/sc} ${4/sc}"/></g></svg><figcaption>trace, then ${bdWord(b.it.bd)} in out</figcaption></figure>`}).join("")}</div>`;
+      s.borders.forEach(r=>txt.push("     • "+r.txt))}
+    if(s.tips)for(const t of s.tips){h+=`<p class="tip">✏ ${esc(t)}</p>`;txt.push("   Tip: "+t)}
+    if(s.pic==="template"){const half=`<svg width="190" viewBox="${m.type==="full"?"40 10 175 395":"40 100 175 165"}" aria-hidden="true"><clipPath id="halfclip"><rect x="0" y="0" width="200" height="420"/></clipPath>
+        <path d="${M.d}" fill="${COLORS[m.color].h}" fill-opacity=".25" stroke="#2b2140" stroke-width="3" stroke-dasharray="8 6" clip-path="url(#halfclip)"/>
+        <line x1="200" y1="0" x2="200" y2="420" stroke="#c2410c" stroke-width="4"/><text x="194" y="${m.type==="full"?60:118}" text-anchor="end" font-family="Patrick Hand,cursive" font-size="20" fill="#c2410c">fold</text></svg>`;
+      h+=`<div class="pics"><figure>${half}<figcaption>Draw this half against the fold</figcaption></figure></div>`}
+    if(s.group)h+=`<div class="pics"><figure>${miniGroup(s.group,110)}<figcaption>${esc(label(s))}</figcaption></figure>${s.twin?`<figure>${miniGroup(s.group,110,true)}<figcaption>its mirror twin</figcaption></figure>`:""}</div>`;
+    if(s.ink)h+=`<div class="pics"><figure>${inkPicture(s.ink,s.inkPieces,i)}<figcaption>Your marker lines — copy them square by square</figcaption></figure></div>`;
+    if(s.pic==="final")h+=`<div class="pics"><figure><svg width="230" viewBox="${M.box}" aria-hidden="true">${DEFS_MINI}${maskPicture()}</svg><figcaption>How it will look</figcaption></figure></div>`;
+    if(s.hero){h+=`<div class="herocardout"><svg viewBox="${M.box}" aria-hidden="true">${DEFS_MINI}${maskPicture()}</svg><div><b>${esc(W.hero)}</b><i>“Their ${esc(word)} Is My Own!”</i><p class="tip" style="margin-top:6px">Put on your mask and strike your hero pose: ${esc(pose)}</p><p style="margin:4px 0 0;font-weight:800">Keep your hero identity secret — only your grown-up helper knows!</p></div></div>`;
+      txt.push(`   ${W.hero} — "Their ${word} Is My Own!"`,`   Strike your hero pose: ${pose}`)}
+    h+=`</div></section>`;txt.push("");
+  });
+  $("bookPage").innerHTML=h;$("copyOut").value=txt.join("\n");$("copyOut").hidden=true;
+  function label(s){return s.t.replace("Paste together ","")}
+}
+function inkPicture(list,withPieces,n){const M=MASKS[S.mask.type],m=S.mask,id="ib"+n;
+  return`<svg width="300" viewBox="${M.box}" aria-hidden="true">${DEFS_MINI}<defs><pattern id="${id}g" width="${PX_IN}" height="${PX_IN}" patternUnits="userSpaceOnUse" x="200" y="0"><path d="M${PX_IN},0 V${PX_IN} H0" fill="none" stroke="#2b2140" stroke-opacity=".18" stroke-width="1"/></pattern></defs>
+    <path d="${M.d}" fill="${COLORS[m.color].h}" fill-opacity=".14" stroke="#2b2140" stroke-width="2" stroke-dasharray="6 4"/>
+    <path d="${M.d}" fill="url(#${id}g)"/>
+    ${withPieces?`<g opacity=".3">${S.groups.filter(g=>g.on&&g.g).map(g=>`<g transform="translate(${g.x} ${g.y}) rotate(${g.r})">${g.items.map(it=>itemSVG(it,"B")).join("")}</g>`).join("")}</g>`:""}
+    ${inkLayer(list,id)}
+    ${M.holes.map(h=>`<ellipse cx="${h.x}" cy="${h.y}" rx="${h.rx}" ry="${h.ry}" fill="#fffdf6" stroke="#2b2140" stroke-width="1.5"/>`).join("")}</svg>`}
+function openBook(){renderBook();$("toast").classList.remove("on");$("studioView").hidden=true;$("book").hidden=false;window.scrollTo(0,0);sfx.glue()}
+let finArm=0;
+$("finishBtn").onclick=()=>{
+  const loose=S.groups.filter(g=>g.on&&!g.g);
+  if(loose.length&&!finArm){finArm=setTimeout(()=>{finArm=0;$("finishBtn").textContent="📒 Make my workbook!"},4000);
+    $("finishBtn").textContent=`🧵 ${loose.length} piece${loose.length>1?"s":""} not stitched — tap to stitch & go!`;return}
+  if(finArm){clearTimeout(finArm);finArm=0;$("finishBtn").textContent="📒 Make my workbook!";loose.forEach(g=>g.g=true);sel=null;render()}
+  openBook();
+};
+$("backBtn").onclick=()=>{$("book").hidden=true;$("studioView").hidden=false;window.scrollTo(0,0)};
+$("copyBtn").onclick=()=>{const t=$("copyOut").value,ok=()=>toast("Copied! Paste it anywhere.");
+  const fall=()=>{$("copyOut").hidden=false;$("copyOut").focus();$("copyOut").select();toast("Select-all is ready — copy it from the box below.")};
+  try{navigator.clipboard.writeText(t).then(ok,fall)}catch(e){fall()}};
+
+/* foam icon filter for craft-box buttons */
+document.body.insertAdjacentHTML("beforeend",`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="foamIcon"><feDropShadow dx="2" dy="3" stdDeviation="1" flood-opacity=".5"/></filter></svg>`);
+
+renderPanels();render();
+window.HeroMaskStudio={get state(){return S},buildWorkbook,zoneOf,render,cut,G,stackOnto,select:id=>{sel=id;render()}};
+})();
+</script>
+
+</body></html>
